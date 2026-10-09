@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: net-relay-config
+  namespace: net-relay
+data:
+  config.json: |
+    {
+      "log": {
+        "loglevel": "warning",
+        "access": "none"
+      },
+      "dns": {
+        "servers": [
+          "https+local://1.1.1.1/dns-query",
+          "https+local://8.8.8.8/dns-query"
+        ]
+      },
+      "inbounds": [
+        {
+          "port": 8081,
+          "listen": "127.0.0.1",
+          "protocol": "vless",
+          "settings": {
+            "clients": [
+              {
+                "id": "REPLACE_WITH_UUID",
+                "level": 0
+              }
+            ],
+            "decryption": "none"
+          },
+          "streamSettings": {
+            "network": "xhttp",
+            "xhttpSettings": {
+              "path": "/api/data",
+              "host": "vpn.example.com",
+              "mode": "auto"
+            }
+          }
+        }
+      ],
+      "outbounds": [
+        {
+          "protocol": "freedom",
+          "settings": { "domainStrategy": "UseIP" },
+          "tag": "direct"
+        },
+        {
+          "protocol": "dns",
+          "tag": "dns-out"
+        }
+      ],
+      "routing": {
+        "rules": [
+          {
+            "type": "field",
+            "port": "53",
+            "outboundTag": "dns-out"
+          }
+        ]
+      }
+    }
